@@ -13,48 +13,48 @@ resource "azurerm_container_registry" "main" {
 
 # VM1
 
-resource "azurerm_virtual_network" "main" {
+resource "azurerm_virtual_network" "vm1-main" {
   name                = "network"
   address_space       = ["10.0.0.0/16"]
   location            = azurerm_resource_group.main.location
   resource_group_name = azurerm_resource_group.main.name
 }
 
-resource "azurerm_subnet" "internal" {
+resource "azurerm_subnet" "vm1-internal" {
   name                 = "internal"
   resource_group_name  = azurerm_resource_group.main.name
-  virtual_network_name = azurerm_virtual_network.main.name
+  virtual_network_name = azurerm_virtual_network.vm1-main.name
   address_prefixes     = ["10.0.2.0/24"]
 }
 
-resource "azurerm_public_ip" "pip" {
+resource "azurerm_public_ip" "vm1-pip" {
   name                = "pip"
   resource_group_name = azurerm_resource_group.main.name
   location            = azurerm_resource_group.main.location
   allocation_method   = "Dynamic"
 }
 
-resource "azurerm_network_interface" "main" {
+resource "azurerm_network_interface" "vm1-main" {
   name                = "vm1-nic1"
   resource_group_name = azurerm_resource_group.main.name
   location            = azurerm_resource_group.main.location
 
   ip_configuration {
     name                          = "primary"
-    subnet_id                     = azurerm_subnet.internal.id
+    subnet_id                     = azurerm_subnet.vm1-internal.id
     private_ip_address_allocation = "Dynamic"
-    public_ip_address_id          = azurerm_public_ip.pip.id
+    public_ip_address_id          = azurerm_public_ip.vm1-pip.id
   }
 }
 
-resource "azurerm_network_interface" "internal" {
+resource "azurerm_network_interface" "vm1-internal" {
   name                = "vm1-nic2"
   resource_group_name = azurerm_resource_group.main.name
   location            = azurerm_resource_group.main.location
 
   ip_configuration {
     name                          = "internal"
-    subnet_id                     = azurerm_subnet.internal.id
+    subnet_id                     = azurerm_subnet.vm1-internal.id
     private_ip_address_allocation = "Dynamic"
   }
 }
@@ -72,12 +72,12 @@ resource "azurerm_network_security_group" "webserver" {
     source_port_range          = "*"
     source_address_prefix      = "*"
     destination_port_range     = "443"
-    destination_address_prefix = azurerm_network_interface.main.private_ip_address
+    destination_address_prefix = azurerm_network_interface.vm1-main.private_ip_address
   }
 }
 
-resource "azurerm_network_interface_security_group_association" "main" {
-  network_interface_id      = azurerm_network_interface.internal.id
+resource "azurerm_network_interface_security_group_association" "vm1-main" {
+  network_interface_id      = azurerm_network_interface.vm1-internal.id
   network_security_group_id = azurerm_network_security_group.webserver.id
 }
 
@@ -88,8 +88,8 @@ resource "azurerm_linux_virtual_machine" "vm1" {
   size                = "Standard_B1s"
   admin_username      = var.ssh_user
   network_interface_ids = [
-    azurerm_network_interface.main.id,
-    azurerm_network_interface.internal.id,
+    azurerm_network_interface.vm1-main.id,
+    azurerm_network_interface.vm1-internal.id,
   ]
 
   admin_ssh_key {
