@@ -16,8 +16,8 @@ terraform validate
 
 # Genera un plan de ejecución especulativo, mostrando qué acciones Terraform
 # debería aplicar en la configuración actual.
-terraform plan
+terraform plan -out=tfplan
 
 # Crea o actualiza la infraestructura según los archivos de configuración
 # de Terraform en el directorio actual.
-terraform apply -auto-approve
+terraform apply -auto-approve "tfplan"
