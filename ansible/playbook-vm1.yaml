@@ -1,0 +1,25 @@
+---
+# This playbook deploys the whole application stack in this site.
+
+- name: 'VM - Aplicación Web'
+  hosts: vm1
+  remote_user: azureuser
+  become: true
+  vars_files:
+     - vars/azure_container_registry_vars.yaml
+  tasks:
+    - name: 'Actualizar la zona horaria'
+      timezone:
+        name: 'Europe/Madrid'
+
+    - name: 'Instalar los paquetes que necesitamos'
+      yum:
+        name:
+          - podman
+        state: latest
+
+    - name: Identificarnos en nuestro Azure container registry y creamos ${XDG_RUNTIME_DIR}/containers/auth.json
+      containers.podman.podman_login:
+        registry: "{{ cr_registry }}"
+        username: "{{ cr_username }}"
+        password: "{{ cr_password }}"
