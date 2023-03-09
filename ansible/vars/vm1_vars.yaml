@@ -1,0 +1,6 @@
+timezone: "Europe/Madrid"
+packages_to_install:
+  - "podman"
+  - "skopeo"
+  - "httpd-tools"
+  - "openssl"

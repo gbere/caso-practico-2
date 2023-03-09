@@ -1,5 +1,5 @@
 ---
-# This playbook deploys the whole application stack in this site.
+# playbook para la linux vm
 
 - name: 'VM - Aplicación Web'
   hosts: vm1
@@ -7,15 +7,23 @@
   become: true
   vars_files:
      - vars/azure_container_registry_vars.yaml
+     - vars/vm1_vars.yaml
   tasks:
+    # TODO: Enable firewall
+
     - name: 'Actualizar la zona horaria'
       timezone:
-        name: 'Europe/Madrid'
+        name: "{{ timezone }}"
+
+    - name: 'Actualizar todos los paquetes instalados'
+      yum:
+        name: '*'
+        state: latest
+        update_cache: yes
 
     - name: 'Instalar los paquetes que necesitamos'
       yum:
-        name:
-          - podman
+        name: "{{ packages_to_install }}" 
         state: latest
 
     - name: Identificarnos en nuestro Azure container registry y creamos ${XDG_RUNTIME_DIR}/containers/auth.json
@@ -23,3 +31,11 @@
         registry: "{{ cr_registry }}"
         username: "{{ cr_username }}"
         password: "{{ cr_password }}"
+
+    - name: Prueba - copiar template
+      template:
+        src: files/index.php.j2
+        dest: "~/index.php"
+        # owner: bin
+        # group: wheel
+        # mode: '0644'
