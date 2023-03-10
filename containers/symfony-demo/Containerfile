@@ -1,6 +1,9 @@
+# usamos tags de versiones de la imagen especificas, para evitar que se rompa
+# la compatibilidad con nuestro proyecto
+
 FROM composer/composer:2-bin AS composer
 
-FROM mlocati/php-extension-installer:latest AS php_extension_installer
+FROM mlocati/php-extension-installer:2.1.8 AS php_extension_installer
 
 FROM php:8.2-fpm-alpine
 
@@ -37,19 +40,22 @@ COPY nginx/nginxconfig.io/* /etc/nginx/nginxconfig.io/
 COPY nginx/http.d/app.conf /etc/nginx/http.d/
 
 COPY ssl/private/* /etc/ssl/private/
-COPY ssl/nginx/dh2048.pem /etc/ssl/nginx/
 
 ENV COMPOSER_ALLOW_SUPERUSER=1
 ENV PATH="${PATH}:/root/.composer/vendor/bin"
 
 COPY --from=composer /composer /usr/bin/composer
 
-# ENV APP_ENV=prod
-# --no-dev --optimize-autoloader
+# ponemos el app de symfony en modo producción
+ENV APP_ENV=prod
+
+# clonamos la versión v2.2.3 de symfony/symfony-demo y instalamos sus dependencias 
 RUN composer create-project symfony/symfony-demo . --prefer-dist v2.2.3
 
+# asignamos como propietario de las carpetas cache, log, etc. El usuario que usa php-fpm y nginx
 RUN chown -R www-data:www-data var/ 
 
 EXPOSE 443/tcp
 
+# usamos como 'entrypoint' php-fpm y ngnix 
 CMD ["/bin/sh", "-c", "php-fpm -D && nginx -g 'daemon off;'; nginx -s reload;"]
