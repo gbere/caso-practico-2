@@ -1,0 +1,53 @@
+FROM composer/composer:2-bin AS composer
+
+FROM mlocati/php-extension-installer:latest AS php_extension_installer
+
+FROM php:8.2-fpm-alpine
+
+WORKDIR /srv/app
+
+# php extensions installer: https://github.com/mlocati/docker-php-extension-installer
+COPY --from=php_extension_installer  /usr/bin/install-php-extensions /usr/local/bin/
+
+# persistent / runtime deps
+RUN apk add --no-cache \
+    nginx \
+    acl \
+    fcgi \
+    file \
+    gettext \
+    git \
+    ;
+
+RUN set -eux; \
+    install-php-extensions \
+    intl \
+    zip \
+    apcu \
+    opcache \
+    ;
+
+RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
+COPY php/conf.d/app.ini $PHP_INI_DIR/conf.d/app.ini
+COPY php/php-fpm.d/zz-docker.conf /usr/local/etc/php-fpm.d/zz-docker.conf
+
+RUN rm /etc/nginx/http.d/default.conf
+COPY nginx/app.conf /etc/nginx/http.d/
+
+ENV COMPOSER_ALLOW_SUPERUSER=1
+ENV PATH="${PATH}:/root/.composer/vendor/bin"
+
+COPY --from=composer /composer /usr/bin/composer
+
+# ENV APP_ENV=prod
+# --no-dev --optimize-autoloader
+RUN composer create-project symfony/symfony-demo . --prefer-dist v2.2.3
+
+RUN chown -R www-data:www-data var/ 
+
+EXPOSE 80
+EXPOSE 443
+# EXPOSE 80/tcp
+# EXPOSE 443/tcp
+
+CMD ["/bin/sh", "-c", "php-fpm -D && nginx -g 'daemon off;'; nginx -s reload;"]
