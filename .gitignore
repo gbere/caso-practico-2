@@ -40,4 +40,4 @@ terraform.rc
 ansible/vars/azure_container_registry_vars.yaml
 ansible/hosts.yaml
 
-containers/symfony-demo/ssl/private/*
+podman/symfony-demo/ssl/private/*
