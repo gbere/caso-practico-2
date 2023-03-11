@@ -1,6 +1,5 @@
 timezone: "Europe/Madrid"
 packages_to_install:
   - "podman"
-  - "skopeo"
-  - "httpd-tools"
-  - "openssl"
+img_name_sf_demo: "symfony-demo"
+img_tag_name_sf_demo: "casopractico2"

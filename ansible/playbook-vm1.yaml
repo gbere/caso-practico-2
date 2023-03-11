@@ -9,7 +9,6 @@
      - vars/azure_container_registry_vars.yaml
      - vars/vm1_vars.yaml
   tasks:
-    # TODO: Enable firewall
 
     - name: 'Actualizar la zona horaria'
       timezone:
@@ -31,6 +30,30 @@
         registry: "{{ cr_registry }}"
         username: "{{ cr_username }}"
         password: "{{ cr_password }}"
+
+    - name: Pull la imagen symfony-demo:casopractico2
+      containers.podman.podman_image:
+        name: "{{ cr_registry }}/{{ img_name_sf_demo }}"
+        tag: "{{ img_tag_name_sf_demo }}"
+
+    - name: Iniciar contenedor con la imagen symfony-demo:casopractico2
+      containers.podman.podman_container:
+        name: "{{ img_name_sf_demo }}"
+        image: "{{ img_name_sf_demo }}:{{ img_tag_name_sf_demo }}"
+        detach: true
+        expose:
+          - 443
+        publish:
+          - 443:443
+        generate_systemd:
+          path: /tmp/
+          restart_policy: always
+          time: 120
+          names: true
+
+    # TODO: Enable firewall?
+    # CHECK: reniciar server para comprobar que funciona
+    # CHECK: la opción de detener o iniciar el servicio por un administrador -> restart_policy: on-failure ?
 
     - name: Prueba - copiar template
       template:
