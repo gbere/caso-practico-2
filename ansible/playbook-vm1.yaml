@@ -36,7 +36,7 @@
         name: "{{ cr_registry }}/{{ img_name_sf_demo }}"
         tag: "{{ img_tag_name_sf_demo }}"
 
-    - name: Iniciar contenedor con la imagen symfony-demo:casopractico2
+    - name: Iniciar contenedor con la imagen symfony-demo:casopractico2 y crear un servicio para systemd
       containers.podman.podman_container:
         name: "{{ img_name_sf_demo }}"
         image: "{{ img_name_sf_demo }}:{{ img_tag_name_sf_demo }}"
@@ -45,20 +45,17 @@
           - 443
         publish:
           - 443:443
+        state: created
         generate_systemd:
-          path: /tmp/
-          restart_policy: always
+          path: /etc/systemd/system/
+          restart_policy: on-failure
           time: 120
           names: true
 
-    # TODO: Enable firewall?
-    # CHECK: reniciar server para comprobar que funciona
-    # CHECK: la opción de detener o iniciar el servicio por un administrador -> restart_policy: on-failure ?
+    - name: Activar y iniciar container-symfony-demo.service
+      ansible.builtin.systemd:
+        name: "container-{{ img_name_sf_demo }}.service"
+        enabled: true
+        state: started
 
-    - name: Prueba - copiar template
-      template:
-        src: files/index.php.j2
-        dest: "~/index.php"
-        # owner: bin
-        # group: wheel
-        # mode: '0644'
+    # TODO: Enable firewall?
