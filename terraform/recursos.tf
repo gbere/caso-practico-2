@@ -11,7 +11,7 @@ resource "azurerm_container_registry" "main" {
   admin_enabled       = true
 }
 
-# VM1
+# Virtual Machine Linux
 
 resource "azurerm_virtual_network" "vm1-main" {
   name                = "network"
@@ -115,3 +115,23 @@ resource "azurerm_linux_virtual_machine" "vm1" {
     version   = "8.5.20220311"
   }
 }
+
+# Azure Kubernetes Cluster
+
+resource "azurerm_kubernetes_cluster" "main" {
+  name                = var.akc_name
+  location            = azurerm_resource_group.main.location
+  resource_group_name = azurerm_resource_group.main.name
+  dns_prefix          = var.akc_name
+
+  default_node_pool {
+    name       = "default"
+    node_count = 1
+    vm_size    = "Standard_DS2_v2"
+  }
+
+  identity {
+    type = "SystemAssigned"
+  }
+}
+

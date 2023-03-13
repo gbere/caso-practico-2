@@ -1,0 +1,26 @@
+---
+# playbook Azure Kubernetes Service
+
+- name: 'Despliegue de la aplicación en el kluster de k8s'
+  hosts: localhost
+  environment:
+    K8S_AUTH_KUBECONFIG: "vars/.kubeconfig"
+  vars_files:
+     # - vars/azure_container_registry_vars.yaml
+     # - vars/05_vars.yaml
+  tasks:
+
+    - name: Create a k8s namespace
+      kubernetes.core.k8s:
+        name: testing
+        api_version: v1
+        kind: Namespace
+        state: present
+
+#    - name: Prueba - copiar template
+#      template:
+#        src: files/index.php.j2
+#        dest: "~/index.php"
+#        # owner: bin
+#        # group: wheel
+#        # mode: '0644'

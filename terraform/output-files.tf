@@ -9,12 +9,22 @@ resource "local_sensitive_file" "acr" {
   })
 }
 
+# Creamos el archivo para la configuración de acceso al cluster de Kubernetes 
+# con permisos de 0700
+resource "local_sensitive_file" "akc" {
+  filename = "${path.module}/../ansible/vars/.kubeconfig"
+  content  = azurerm_kubernetes_cluster.main.kube_config_raw
+}
+
 # Creamos el archivo hosts.yaml para ansible
 resource "local_file" "hosts" {
   filename = "${path.module}/../ansible/hosts.yaml"
   content = yamlencode({
     "vm1" : {
       "hosts" : "${azurerm_linux_virtual_machine.vm1.public_ip_address}",
+    },
+    "k8s" : {
+      "hosts" : "${azurerm_kubernetes_cluster.main.fqdn}",
     },
   })
 }

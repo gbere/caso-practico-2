@@ -14,3 +14,7 @@ output "container_registry_admin_password" {
 output "vm1_pip" {
   value = azurerm_linux_virtual_machine.vm1.public_ip_address
 }
+
+output "akc_fqdn" {
+  value = azurerm_kubernetes_cluster.main.fqdn
+}
