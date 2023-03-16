@@ -1,21 +1,28 @@
----
-# playbook Azure Kubernetes Service
+# playbook para el cluster de k8s
 
-- name: 'Despliegue de la aplicación en el kluster de k8s'
+- name: 'Despliegue de AKS'
   hosts: localhost
   environment:
     K8S_AUTH_KUBECONFIG: "vars/.kubeconfig"
   vars_files:
-     # - vars/azure_container_registry_vars.yaml
-     # - vars/05_vars.yaml
+     - vars/aks1_vars.yaml
   tasks:
 
-    - name: Create a k8s namespace
+    - name: 'Definir los objectos deployment y servicios'
+      template:
+        src: "templates/aks1-deployment.j2"
+        dest: "{{ directorio_trabajo }}/{{ aplicacion.definicion }}"
+
+    - name: 'Crear el namespace de trabajo'
       kubernetes.core.k8s:
-        name: testing
-        api_version: v1
         kind: Namespace
+        name: "{{ k8s_namespace }}"
+
+    - name: 'Crear Deployments y servicios de la aplicación'
+      kubernetes.core.k8s:
         state: present
+        #state: absent
+        template: "{{ directorio_trabajo }}/{{ aplicacion.definicion }}"
 
 #    - name: Prueba - copiar template
 #      template:

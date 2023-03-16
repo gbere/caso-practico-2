@@ -1,0 +1,116 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: "{{ aplicacion.mysql.pv_claim.nombre }}"
+  namespace: "{{ k8s_namespace }}"
+  labels:
+    app: "{{ aplicacion.mysql.nombre }}"
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: "{{ aplicacion.mysql.pv_claim.espacio }}"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "{{ aplicacion.mysql.nombre }}"
+  namespace: "{{ k8s_namespace }}"
+spec:
+  replicas: {{ aplicacion.mysql.replicas }}
+  selector:
+    matchLabels:
+      app: "{{ aplicacion.mysql.nombre }}"
+  template:
+    metadata:
+      labels:
+        app: "{{ aplicacion.mysql.nombre }}"
+    spec:
+      nodeSelector:
+        "kubernetes.io/os": linux
+      containers:
+      - name: "{{ aplicacion.mysql.nombre }}"
+        image: "{{ aplicacion.mysql.imagen }}"
+        env:
+        - name: MYSQL_DATABASE
+          value: "{{ aplicacion.mysql.env.database }}"
+        - name: MYSQL_USER
+          value: "{{ aplicacion.mysql.env.user }}"
+        - name: MYSQL_PASSWORD
+          value: "{{ aplicacion.mysql.env.password }}"
+        - name: MYSQL_ALLOW_EMPTY_PASSWORD
+          value: "{{ aplicacion.mysql.env.allow_empty_password }}"
+        resources:
+          requests:
+            cpu: "{{ aplicacion.mysql.recursos.cpu }}"
+            memory: "{{ aplicacion.mysql.recursos.memoria }}"
+          limits:
+            cpu: "{{ aplicacion.mysql.limites.cpu }}"
+            memory: "{{ aplicacion.mysql.limites.memoria }}"
+        ports:
+        - containerPort: {{ aplicacion.mysql.puerto }}
+          name: "{{ aplicacion.mysql.nombre }}"
+        volumeMounts:
+          - name: "{{ aplicacion.mysql.pv_claim.nombre_volumen }}"
+            mountPath: /var/lib/mysql
+      volumes:
+        - name: "{{ aplicacion.mysql.pv_claim.nombre_volumen }}"
+          persistentVolumeClaim:
+          claimName: "{{ aplicacion.mysql.pv_claim.nombre }}"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: "{{ aplicacion.mysql.nombre }}"
+  namespace: "{{ k8s_namespace }}"
+spec:
+  ports:
+  - port: {{ aplicacion.mysql.puerto }}
+  selector:
+    app: "{{ aplicacion.mysql.nombre }}"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "{{ aplicacion.adminer.nombre }}"
+  namespace: "{{ k8s_namespace }}"
+spec:
+  replicas: {{ aplicacion.adminer.replicas }}
+  selector:
+    matchLabels:
+      app: "{{ aplicacion.adminer.nombre }}"
+  template:
+    metadata:
+      labels:
+        app: "{{ aplicacion.adminer.nombre }}"
+    spec:
+      nodeSelector:
+        "kubernetes.io/os": linux
+      containers:
+      - name: "{{ aplicacion.adminer.nombre }}"
+        image: "{{ aplicacion.adminer.imagen }}"
+        resources:
+          requests:
+            cpu: "{{ aplicacion.adminer.recursos.cpu }}"
+            memory: "{{ aplicacion.adminer.recursos.memoria }}"
+          limits:
+            cpu: "{{ aplicacion.adminer.limites.cpu }}"
+            memory: "{{ aplicacion.adminer.limites.memoria }}"
+        ports:
+        - containerPort: {{ aplicacion.adminer.puertoContenedor }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: "{{ aplicacion.adminer.nombre }}"
+  namespace: "{{ k8s_namespace }}"
+spec:
+  loadBalancerIP: 20.74.0.216
+  type: LoadBalancer
+  ports:
+  - port: {{ aplicacion.adminer.puertoEntrada }}
+    protocol: TCP
+    targetPort: {{ aplicacion.adminer.puertoContenedor }}
+  selector:
+    app: "{{ aplicacion.adminer.nombre }}"

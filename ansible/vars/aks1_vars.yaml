@@ -1,0 +1,36 @@
+k8s_namespace: "unir"
+directorio_trabajo: "/tmp"
+aplicacion:
+  definicion: "aks1-deployment.yaml"
+  adminer:
+    nombre: adminer
+    imagen: adminer:4.8.1
+    replicas: 1
+    recursos:
+      cpu: 100m
+      memoria: 128Mi
+    limites:
+      cpu: 250m
+      memoria: 256Mi
+    puertoContenedor: 8080
+    puertoEntrada: 80
+  mysql:
+    nombre: mysql
+    imagen: mysql:5.7.41
+    replicas: 1
+    recursos:
+      cpu: 100m
+      memoria: 128Mi
+    limites:
+      cpu: 250m
+      memoria: 256Mi
+    puerto: 3306
+    env:
+      database: unir
+      user: unir
+      password: unir
+      allow_empty_password: true
+    pv_claim:
+      nombre: mysql-pv-claim
+      nombre_volumen: mysql-persistent-storage
+      espacio: 5Gi
