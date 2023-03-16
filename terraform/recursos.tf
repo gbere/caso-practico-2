@@ -125,9 +125,15 @@ resource "azurerm_kubernetes_cluster" "main" {
   dns_prefix          = var.akc_name
 
   default_node_pool {
-    name       = "default"
-    node_count = 1
-    vm_size    = "Standard_DS2_v2"
+    name           = "default"
+    node_count     = 1
+    vm_size        = "Standard_DS2_v2"
+    vnet_subnet_id = azurerm_subnet.example.id
+  }
+
+  network_profile {
+    network_plugin    = "kubenet"
+    load_balancer_sku = "standard"
   }
 
   identity {
@@ -135,3 +141,21 @@ resource "azurerm_kubernetes_cluster" "main" {
   }
 }
 
+resource "azurerm_virtual_network" "example" {
+  name                = "aks1-vnet"
+  location            = azurerm_resource_group.main.location
+  resource_group_name = azurerm_resource_group.main.name
+  address_space       = ["192.168.0.0/16"]
+}
+
+resource "azurerm_subnet" "example" {
+  name                 = "aks1-subnet"
+  resource_group_name  = azurerm_resource_group.main.name
+  address_prefixes     = ["192.168.1.0/24"]
+  virtual_network_name = azurerm_virtual_network.example.name
+}
+
+data "azurerm_public_ip" "example" {
+  name                = reverse(split("/", tolist(azurerm_kubernetes_cluster.main.network_profile.0.load_balancer_profile.0.effective_outbound_ips)[0]))[0]
+  resource_group_name = azurerm_kubernetes_cluster.main.node_resource_group
+}

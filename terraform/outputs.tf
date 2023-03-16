@@ -18,3 +18,8 @@ output "vm1_pip" {
 output "akc_fqdn" {
   value = azurerm_kubernetes_cluster.main.fqdn
 }
+
+# TODO: move to an output file
+output "aks1_pip" {
+  value = data.azurerm_public_ip.example.ip_address
+}
