@@ -16,35 +16,41 @@
         username: "{{ cr_username }}"
         password: "{{ cr_password }}"
 
-    - name: Pull mysql imagen
+    - name: Pull de la imagen de mysql
       containers.podman.podman_image:
         name: "{{ aplicacion.mysql.imagen.nombre }}:{{ aplicacion.mysql.imagen.tag }}"
 
-    - name: Cambiar el tag de la imagen mysql
+    - name: Cambiar el repositorio, carpeta y tag de la imagen mysql
       containers.podman.podman_tag:
         image: "{{ aplicacion.mysql.imagen.nombre }}:{{ aplicacion.mysql.imagen.tag }}"
         target_names:
-          - "{{ cr_registry }}/{{ aplicacion.mysql.imagen.nombre }}:{{ img_tag_name_cp2 }}"
+          - "{{ cr_registry }}/{{ aplicacion.mysql.imagen.carpeta_destino }}/{{ aplicacion.mysql.imagen.nombre }}:{{ img_tag_name_cp2 }}"
 
-    - name: Push mysql imagen
+    - name: Push de nuestra imagen de mysql
       containers.podman.podman_image:
-        name: "{{ cr_registry }}/{{ aplicacion.mysql.imagen.nombre }}:{{ img_tag_name_cp2 }}"
+        name: "{{ cr_registry }}/{{ aplicacion.mysql.imagen.carpeta_destino }}/{{ aplicacion.mysql.imagen.nombre }}:{{ img_tag_name_cp2 }}"
         push: true
         push_args:
           dest: "{{ cr_registry }}"
 
-    # - name: 'Definir los objectos deployment y servicios'
-    #   template:
-    #     src: "templates/aks1-deployment.j2"
-    #     dest: "{{ directorio_trabajo }}/{{ aplicacion.definicion }}"
+    - name: 'Definir los objectos deployment y servicios'
+      template:
+        src: "templates/aks1-deployment.j2"
+        dest: "{{ directorio_trabajo }}/{{ aplicacion.definicion }}"
 
-    # - name: 'Crear el namespace de trabajo'
-    #   kubernetes.core.k8s:
-    #     kind: Namespace
-    #     name: "{{ k8s_namespace }}"
+    - name: 'Crear el namespace de trabajo'
+      kubernetes.core.k8s:
+        kind: Namespace
+        name: "{{ k8s_namespace }}"
+
+    - name: 'Crear Deployments y servicios de la aplicación'
+      kubernetes.core.k8s:
+        state: present
+        #state: absent
+        template: "{{ directorio_trabajo }}/{{ aplicacion.definicion }}"
 
     # - name: 'Crear Deployments y servicios de la aplicación'
     #   kubernetes.core.k8s:
-    #     state: present
-    #     #state: absent
-    #     template: "{{ directorio_trabajo }}/{{ aplicacion.definicion }}"
+    #     #state: present
+    #     state: absent
+    #     template: "templates/prova.yaml"
