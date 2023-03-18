@@ -5,29 +5,46 @@
   environment:
     K8S_AUTH_KUBECONFIG: "vars/.kubeconfig"
   vars_files:
+     - vars/private_vars.yaml
+     - vars/common_vars.yaml
      - vars/aks1_vars.yaml
   tasks:
 
-    - name: 'Definir los objectos deployment y servicios'
-      template:
-        src: "templates/aks1-deployment.j2"
-        dest: "{{ directorio_trabajo }}/{{ aplicacion.definicion }}"
+    - name: Identificarnos en nuestro Azure container registry y creamos ${XDG_RUNTIME_DIR}/containers/auth.json
+      containers.podman.podman_login:
+        registry: "{{ cr_registry }}"
+        username: "{{ cr_username }}"
+        password: "{{ cr_password }}"
 
-    - name: 'Crear el namespace de trabajo'
-      kubernetes.core.k8s:
-        kind: Namespace
-        name: "{{ k8s_namespace }}"
+    - name: Pull mysql imagen
+      containers.podman.podman_image:
+        name: "{{ aplicacion.mysql.imagen.nombre }}:{{ aplicacion.mysql.imagen.tag }}"
 
-    - name: 'Crear Deployments y servicios de la aplicación'
-      kubernetes.core.k8s:
-        state: present
-        #state: absent
-        template: "{{ directorio_trabajo }}/{{ aplicacion.definicion }}"
+    - name: Cambiar el tag de la imagen mysql
+      containers.podman.podman_tag:
+        image: "{{ aplicacion.mysql.imagen.nombre }}:{{ aplicacion.mysql.imagen.tag }}"
+        target_names:
+          - "{{ cr_registry }}/{{ aplicacion.mysql.imagen.nombre }}:{{ img_tag_name_cp2 }}"
 
-#    - name: Prueba - copiar template
-#      template:
-#        src: files/index.php.j2
-#        dest: "~/index.php"
-#        # owner: bin
-#        # group: wheel
-#        # mode: '0644'
+    - name: Push mysql imagen
+      containers.podman.podman_image:
+        name: "{{ cr_registry }}/{{ aplicacion.mysql.imagen.nombre }}:{{ img_tag_name_cp2 }}"
+        push: true
+        push_args:
+          dest: "{{ cr_registry }}"
+
+    # - name: 'Definir los objectos deployment y servicios'
+    #   template:
+    #     src: "templates/aks1-deployment.j2"
+    #     dest: "{{ directorio_trabajo }}/{{ aplicacion.definicion }}"
+
+    # - name: 'Crear el namespace de trabajo'
+    #   kubernetes.core.k8s:
+    #     kind: Namespace
+    #     name: "{{ k8s_namespace }}"
+
+    # - name: 'Crear Deployments y servicios de la aplicación'
+    #   kubernetes.core.k8s:
+    #     state: present
+    #     #state: absent
+    #     template: "{{ directorio_trabajo }}/{{ aplicacion.definicion }}"

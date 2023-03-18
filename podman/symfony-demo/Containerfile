@@ -57,5 +57,5 @@ RUN chown -R www-data:www-data var/
 
 EXPOSE 443/tcp
 
-# usamos como 'entrypoint' php-fpm y ngnix 
+# ejecutamos php-fpm y ngnix 
 CMD ["/bin/sh", "-c", "php-fpm -D && nginx -g 'daemon off;'; nginx -s reload;"]

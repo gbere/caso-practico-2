@@ -39,6 +39,8 @@ spec:
           value: "{{ aplicacion.mysql.env.user }}"
         - name: MYSQL_PASSWORD
           value: "{{ aplicacion.mysql.env.password }}"
+        - name: MYSQL_ROOT_PASSWORD
+          value: "{{ aplicacion.mysql.env.root_password }}"
         - name: MYSQL_ALLOW_EMPTY_PASSWORD
           value: "{{ aplicacion.mysql.env.allow_empty_password }}"
         resources:
@@ -106,7 +108,7 @@ metadata:
   name: "{{ aplicacion.adminer.nombre }}"
   namespace: "{{ k8s_namespace }}"
 spec:
-  loadBalancerIP: 20.74.0.216
+  loadBalancerIP: {{ aks1_pip }}
   type: LoadBalancer
   ports:
   - port: {{ aplicacion.adminer.puertoEntrada }}

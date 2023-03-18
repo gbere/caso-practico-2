@@ -16,7 +16,11 @@ aplicacion:
     puertoEntrada: 80
   mysql:
     nombre: mysql
-    imagen: mysql:5.7.41
+    imagen:
+      nombre: mysql
+      tag: 5.7.41
+      carpeta_destino: carpeta-mysql
+    imagen_tag:
     replicas: 1
     recursos:
       cpu: 100m
@@ -29,6 +33,7 @@ aplicacion:
       database: unir
       user: unir
       password: unir
+      root_password: unir
       allow_empty_password: true
     pv_claim:
       nombre: mysql-pv-claim

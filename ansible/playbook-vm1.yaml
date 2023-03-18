@@ -6,7 +6,8 @@
   remote_user: azureuser
   become: true
   vars_files:
-     - vars/azure_container_registry_vars.yaml
+     - vars/private_vars.yaml
+     - vars/common_vars.yaml
      - vars/vm1_vars.yaml
   tasks:
 
@@ -34,12 +35,12 @@
     - name: Pull la imagen symfony-demo:casopractico2
       containers.podman.podman_image:
         name: "{{ cr_registry }}/{{ img_name_sf_demo }}"
-        tag: "{{ img_tag_name_sf_demo }}"
+        tag: "{{ img_tag_name_cp2 }}"
 
     - name: Iniciar contenedor con la imagen symfony-demo:casopractico2 y crear un servicio para systemd
       containers.podman.podman_container:
         name: "{{ img_name_sf_demo }}"
-        image: "{{ img_name_sf_demo }}:{{ img_tag_name_sf_demo }}"
+        image: "{{ img_name_sf_demo }}:{{ img_tag_name_cp2 }}"
         detach: true
         expose:
           - 443

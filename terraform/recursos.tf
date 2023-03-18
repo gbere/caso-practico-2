@@ -14,21 +14,21 @@ resource "azurerm_container_registry" "main" {
 # Virtual Machine Linux
 
 resource "azurerm_virtual_network" "vm1-main" {
-  name                = "network"
+  name                = "vm1-network"
   address_space       = ["10.0.0.0/16"]
   location            = azurerm_resource_group.main.location
   resource_group_name = azurerm_resource_group.main.name
 }
 
 resource "azurerm_subnet" "vm1-internal" {
-  name                 = "internal"
+  name                 = "vm1-internal"
   resource_group_name  = azurerm_resource_group.main.name
   virtual_network_name = azurerm_virtual_network.vm1-main.name
   address_prefixes     = ["10.0.2.0/24"]
 }
 
 resource "azurerm_public_ip" "vm1-pip" {
-  name                = "pip"
+  name                = "vm1-pip"
   resource_group_name = azurerm_resource_group.main.name
   location            = azurerm_resource_group.main.location
   allocation_method   = "Dynamic"
@@ -53,7 +53,7 @@ resource "azurerm_network_interface" "vm1-internal" {
   location            = azurerm_resource_group.main.location
 
   ip_configuration {
-    name                          = "internal"
+    name                          = "vm1-internal"
     subnet_id                     = azurerm_subnet.vm1-internal.id
     private_ip_address_allocation = "Dynamic"
   }
@@ -128,7 +128,7 @@ resource "azurerm_kubernetes_cluster" "main" {
     name           = "default"
     node_count     = 1
     vm_size        = "Standard_DS2_v2"
-    vnet_subnet_id = azurerm_subnet.example.id
+    vnet_subnet_id = azurerm_subnet.aks1-internal.id
   }
 
   network_profile {
@@ -141,21 +141,21 @@ resource "azurerm_kubernetes_cluster" "main" {
   }
 }
 
-resource "azurerm_virtual_network" "example" {
-  name                = "aks1-vnet"
+resource "azurerm_virtual_network" "aks1-net" {
+  name                = "aks1-network"
   location            = azurerm_resource_group.main.location
   resource_group_name = azurerm_resource_group.main.name
-  address_space       = ["192.168.0.0/16"]
+  address_space       = ["10.10.0.0/16"]
 }
 
-resource "azurerm_subnet" "example" {
-  name                 = "aks1-subnet"
+resource "azurerm_subnet" "aks1-internal" {
+  name                 = "aks1-internal"
   resource_group_name  = azurerm_resource_group.main.name
-  address_prefixes     = ["192.168.1.0/24"]
-  virtual_network_name = azurerm_virtual_network.example.name
+  address_prefixes     = ["10.10.1.0/24"]
+  virtual_network_name = azurerm_virtual_network.aks1-net.name
 }
 
-data "azurerm_public_ip" "example" {
+data "azurerm_public_ip" "aks1-pip" {
   name                = reverse(split("/", tolist(azurerm_kubernetes_cluster.main.network_profile.0.load_balancer_profile.0.effective_outbound_ips)[0]))[0]
   resource_group_name = azurerm_kubernetes_cluster.main.node_resource_group
 }
