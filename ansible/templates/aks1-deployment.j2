@@ -91,7 +91,7 @@ spec:
         "kubernetes.io/os": linux
       containers:
       - name: "{{ aplicacion.adminer.nombre }}"
-        image: "{{ aplicacion.adminer.imagen }}"
+        image: "{{ aplicacion.adminer.imagen.nombre }}:{{ aplicacion.adminer.imagen.tag }}"
         resources:
           requests:
             cpu: "{{ aplicacion.adminer.recursos.cpu }}"

@@ -4,7 +4,10 @@ aplicacion:
   definicion: "aks1-deployment.yaml"
   adminer:
     nombre: adminer
-    imagen: adminer:4.8.1
+    imagen:
+      nombre: adminer
+      tag: 4.8.1
+      carpeta_destino: carpeta-adminer
     replicas: 1
     recursos:
       cpu: 100m
@@ -20,7 +23,6 @@ aplicacion:
       nombre: mysql
       tag: 5.7.41
       carpeta_destino: carpeta-mysql
-    imagen_tag:
     replicas: 1
     recursos:
       cpu: 100m
