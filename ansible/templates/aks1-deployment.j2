@@ -32,16 +32,17 @@ spec:
       containers:
       - name: "{{ aplicacion.mysql.nombre }}"
         image: "{{ aplicacion.mysql.imagen.nombre }}:{{ aplicacion.mysql.imagen.tag }}"
+        restartPolicy: "{{ aplicacion.politica_renicio }}"
         env:
-        - name: MYSQL_DATABASE
+        - name: MARIADB_DATABASE
           value: "{{ aplicacion.mysql.env.database }}"
-        - name: MYSQL_USER
+        - name: MARIADB_USER
           value: "{{ aplicacion.mysql.env.user }}"
-        - name: MYSQL_PASSWORD
+        - name: MARIADB_PASSWORD
           value: "{{ aplicacion.mysql.env.password }}"
-        - name: MYSQL_ROOT_PASSWORD
+        - name: MARIADB_ROOT_PASSWORD
           value: "{{ aplicacion.mysql.env.root_password }}"
-        - name: MYSQL_ALLOW_EMPTY_PASSWORD
+        - name: MARIADB_ALLOW_EMPTY_PASSWORD
           value: "{{ aplicacion.mysql.env.allow_empty_password }}"
         resources:
           requests:
@@ -92,6 +93,7 @@ spec:
       containers:
       - name: "{{ aplicacion.adminer.nombre }}"
         image: "{{ aplicacion.adminer.imagen.nombre }}:{{ aplicacion.adminer.imagen.tag }}"
+        restartPolicy: "{{ aplicacion.politica_renicio }}"
         resources:
           requests:
             cpu: "{{ aplicacion.adminer.recursos.cpu }}"

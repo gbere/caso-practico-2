@@ -2,6 +2,7 @@ k8s_namespace: "unir"
 directorio_trabajo: "/tmp"
 aplicacion:
   definicion: "aks1-deployment.yaml"
+  politica_renicio: OnFailure
   adminer:
     nombre: adminer
     imagen:
@@ -20,8 +21,8 @@ aplicacion:
   mysql:
     nombre: mysql
     imagen:
-      nombre: mysql
-      tag: 5.7.41
+      nombre: mariadb
+      tag: 10.7.8
       carpeta_destino: carpeta-mysql
     replicas: 1
     recursos:

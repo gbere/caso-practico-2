@@ -63,4 +63,5 @@
     - name: 'Crear Deployments y servicios de la aplicación'
       kubernetes.core.k8s:
         state: present
+        #state: absent
         template: "{{ directorio_trabajo }}/{{ aplicacion.definicion }}"
