@@ -21,3 +21,9 @@ variable "rg_name" {
   description = "Resource group"
   default     = "rg-cp2"
 }
+
+variable "akc_name" {
+  type        = string
+  description = "Azure kubernetes cluster name"
+  default     = "cp2-aks"
+}

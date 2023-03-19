@@ -1,24 +1,25 @@
 #!/usr/bin/env bash
 
 TF_DIR="./terraform"
-REGISTRY_LOGIN_SERVER=$(terraform -chdir=$TF_DIR output -raw container_registry_login_server)
-IMG_DIR_SF_DEMO="./podman/symfony-demo/"
-IMG_NAME_SF_DEMO="symfony-demo:casopractico2"
 
-# ./terraform/deploy.sh
+# desplegamos todos los recursos definidos en terraform
+./terraform/deploy.sh
 
-# nos identificamos en nuestro registro privado
-podman login --username $(terraform -chdir=$TF_DIR output -raw container_registry_admin_username) \
-    --password $(terraform -chdir=$TF_DIR output -raw container_registry_admin_password) \
-    $REGISTRY_LOGIN_SERVER
+./podman/deploy.sh
 
-# generamos sf-demo.key, sf-demo.csr, sf-demo.crt y dh2048.pem
-${IMG_DIR_SF_DEMO}generate-ssl.sh
+./ansible/deploy.sh
 
-# generamos la imagen symfony-demo:casopractico2
-podman build -t $IMG_NAME_SF_DEMO $IMG_DIR_SF_DEMO
-IMG_SF_DEMO_DESTINATION=$REGISTRY_LOGIN_SERVER/$IMG_NAME_SF_DEMO
-# tageamos la imagen con nuestro registy + nombre-de-imagen:tag
-podman tag $IMG_NAME_SF_DEMO $IMG_SF_DEMO_DESTINATION
-# y la subimos
-podman push $IMG_SF_DEMO_DESTINATION
+VM1_PUBLIC_IP=$(terraform -chdir=$TF_DIR output -raw vm1_pip)
+AKS1_PUBLIC_IP=$(terraform -chdir=$TF_DIR output -raw aks1_pip)
+NL='\n\r'
+
+echo -e "${NL}En breve se podra visitar:${NL}${NL}" \
+    "   - La máquina virtual de linux con el app symfony demo${NL}" \
+    "       -> URL: https:\\\\\\\\${VM1_PUBLIC_IP}\ ${NL}" \
+    "       -> Zona segura: Entrar en backend y usar el usario administrador${NL}${NL}" \
+    "   - El cluster AKS con adminer y mysql ${NL}"  \
+    "       -> URL: http:\\\\\\\\${AKS1_PUBLIC_IP}\ ${NL}" \
+    "       -> Servidor: mysql ${NL}" \
+    "       -> Usuario: root o unir ${NL}" \
+    "       -> Contraseña: unir ${NL}" \
+    "       -> Base de datos: unir ${NL}"
