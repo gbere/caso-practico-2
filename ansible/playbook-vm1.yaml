@@ -32,10 +32,44 @@
         username: "{{ cr_username }}"
         password: "{{ cr_password }}"
 
-    - name: Pull la imagen symfony-demo:casopractico2
+    - name: Copiar archivos para crear el contenedor symfony-demo
+      ansible.builtin.copy:
+        src: symfony-demo
+        dest: ~/
+
+    - name: Generar y una clave privada OpenSSL
+      community.crypto.openssl_privatekey:
+        path: ~/symfony-demo/ssl/private/sf-demo.key
+        size: 2048
+
+    - name: Generar un certificado OpenSSL
+      community.crypto.openssl_csr:
+        path: ~/symfony-demo/ssl/private/sf-demo.csr
+        privatekey_path: ~/symfony-demo/ssl/private/sf-demo.key
+        country_name: ES
+        organization_name: DevOps
+        common_name: vm1
+
+    - name: Generar certificado OpenSSL autofirmado
+      community.crypto.x509_certificate:
+        path: ~/symfony-demo/ssl/private/sf-demo.crt
+        privatekey_path: ~/symfony-demo/ssl/private/sf-demo.key
+        csr_path: ~/symfony-demo/ssl/private/sf-demo.csr
+        provider: selfsigned
+
+    - name: Generar DH Parameters
+      community.crypto.openssl_dhparam:
+        path: ~/symfony-demo/ssl/private/dh2048.pem
+        size: 2048
+
+    - name: Construir y subir la imagen al registro privado
       containers.podman.podman_image:
-        name: "{{ cr_registry }}/{{ img_name_sf_demo }}"
+        name: "{{ img_name_sf_demo }}"
         tag: "{{ img_tag_name_cp2 }}"
+        path: ~/symfony-demo
+        push: yes
+        push_args:
+          dest: "{{ cr_registry }}"
 
     - name: Iniciar contenedor con la imagen symfony-demo:casopractico2 y crear un servicio para systemd
       containers.podman.podman_container:

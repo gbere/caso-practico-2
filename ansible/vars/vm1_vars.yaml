@@ -1,4 +1,5 @@
 timezone: "Europe/Madrid"
 packages_to_install:
   - "podman"
+  - "openssl"
 img_name_sf_demo: "symfony-demo"

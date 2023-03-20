@@ -41,6 +41,4 @@ ansible/vars/private_vars.yaml
 ansible/vars/.kubeconfig
 ansible/hosts.yaml
 
-podman/symfony-demo/ssl/private/*
-
 terraform-tmp/*

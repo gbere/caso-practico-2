@@ -5,8 +5,6 @@ TF_DIR="./terraform"
 # desplegamos todos los recursos definidos en terraform
 ./terraform/deploy.sh
 
-./podman/deploy.sh
-
 ./ansible/deploy.sh
 
 VM1_PUBLIC_IP=$(terraform -chdir=$TF_DIR output -raw vm1_pip)
