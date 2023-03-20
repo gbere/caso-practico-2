@@ -42,3 +42,4 @@ aplicacion:
       nombre: mysql-pv-claim
       nombre_volumen: mysql-persistent-storage
       espacio: 5Gi
+      ruta_montaje: /var/lib/mysql

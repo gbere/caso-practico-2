@@ -56,7 +56,7 @@ spec:
           name: "{{ aplicacion.mysql.nombre }}"
         volumeMounts:
           - name: "{{ aplicacion.mysql.pv_claim.nombre_volumen }}"
-            mountPath: /var/lib/mysql
+            mountPath: "{{ aplicacion.mysql.pv_claim.ruta_montaje }}"
       volumes:
         - name: "{{ aplicacion.mysql.pv_claim.nombre_volumen }}"
           persistentVolumeClaim:
