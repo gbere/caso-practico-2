@@ -2,6 +2,7 @@
 
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
+# Instalamos las collections adicionales, en caso de no tenerlas instaladas
 ansible-galaxy collection install containers.podman
 ansible-galaxy collection install community.crypto
 
